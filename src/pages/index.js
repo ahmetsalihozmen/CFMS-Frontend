@@ -1,65 +1,62 @@
 import Head from 'next/head'
-import styles from '../styles/Home.module.css'
+import React from 'react'
+import { Button, Col, Container, Form, InputGroup, Row } from 'react-bootstrap'
+import GetMesssage from '../components/GetMesssage'
+import SendMessage from '../components/SendMessage'
+
+
+const sendMessage = async (message) => {
+  const response = await fetch('/api/sendMessage', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      message: message
+    })
+  })
+  const data = await response.json()
+  
+  console.log(data)
+}
 
 export default function Home() {
+
+  const [message, setMessage] = React.useState('')
+
+  console.log(message)
   return (
-    <div className={styles.container}>
-      <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+    <div>
+      <Container classname='w-100 h-100' >
+        <Row>
+          <Col md={4} className='left-side border border-dark'>
+            <h1 className=''>Mesajlar</h1>
+          </Col>
 
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
+          <Col className='right-side border border-dark'>
+            <Row>
+              <div className='right-side border border-dark'>
+                <GetMesssage />
+                <SendMessage />
+              </div>
+            </Row>
+            <Row>
+              <Col>
+                <input className='w-80' value={message} type="text" onChange={(e) => setMessage(e.target.value)} />
+                <Button variant="danger" size="md" onClick={() => {
+                  sendMessage(message)
+                  setMessage('')
+                }} >Deneme</Button>
+              </Col>
 
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
+            </Row>
+          </Col>
+        </Row>
+      </Container>
 
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
 
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
 
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
 
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
     </div>
   )
 }
