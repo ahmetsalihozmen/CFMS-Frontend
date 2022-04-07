@@ -20,14 +20,15 @@ const sendMessage = async (message) => {
   console.log(data)
 }
 
-export default function Home() {
+
+export default function Home({initialMessages}) {
 
   const [message, setMessage] = React.useState('')
 
-  console.log(message)
+  console.log(initialMessages)
   return (
     <div>
-      <Container classname='w-100 h-100' >
+      <Container className='w-100 h-100' >
         <Row>
           <Col md={4} className='left-side border border-dark'>
             <h1 className=''>Mesajlar</h1>
@@ -36,8 +37,14 @@ export default function Home() {
           <Col className='right-side border border-dark'>
             <Row>
               <div className='right-side border border-dark'>
-                <GetMesssage />
-                <SendMessage />
+                {initialMessages.map(message => 
+                message.user.id === 1 ?
+                <SendMessage key={message.id} message={message.text} />
+                :
+                <GetMesssage key={message.id} message={message.text} />              
+                )
+
+  }
               </div>
             </Row>
             <Row>
@@ -59,4 +66,16 @@ export default function Home() {
 
     </div>
   )
+}
+
+
+// write get static props
+export async function getServerSideProps() {
+  const response = await fetch('http://localhost:3000/api/getMessages')
+  const data = await response.json()
+  return {
+    props: {
+      initialMessages: data
+    }
+  }
 }
