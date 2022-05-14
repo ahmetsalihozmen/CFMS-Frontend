@@ -7,6 +7,7 @@ import MainLayout from "../components/layouts/MainLayout";
 import { CONVERSATIONS_URL } from "../utils/constants";
 
 export default function ChatPage({ conversations }) {
+  console.log(conversations);
   const [selectedConversation, setSelectedConversation] = useState(conversations[0]);
 
   return (
@@ -27,6 +28,7 @@ export default function ChatPage({ conversations }) {
   );
 }
 
+// TODO Yeni conversation handle
 export async function getServerSideProps() {
   const response = await axios.get(CONVERSATIONS_URL);
   const conversations = response?.data?.data;

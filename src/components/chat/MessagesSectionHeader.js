@@ -4,6 +4,18 @@ import getPlatformName from "../../utils/getPlatformName";
 import PlatformIcon from "./PlatformIcon";
 
 export default function MessagesSectionHeader({ conversation }) {
+  if (!conversation)
+    return (
+      <>
+        <Row className="bg-gray py-3 border-bottom">
+          <Col>
+          </Col>
+          <Col>
+          </Col>
+        </Row>
+      </>
+    );
+
   const { clientName, platform } = conversation;
   const platformName = getPlatformName(platform);
 

@@ -1,17 +1,20 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Col, Row } from "react-bootstrap";
-import { BACKEND_URL, SEND_MESSAGE_PATH, TOPIC_PATH } from "../../utils/constants";
+import { BACKEND_URL, CHAT_PATH, SEND_MESSAGE_PATH, TOPIC_PATH } from "../../utils/constants";
 import MessagesSectionHeader from "./MessagesSectionHeader";
 import MessagesSectionListItem from "./MessagesSectionListItem";
 import SendMessageInput from "./SendMessageInput";
 import SockJsClient from "react-stomp";
 
 export default function MessagesSection({ conversation }) {
+  if (!conversation) return <></>;
   const { id } = conversation;
   const [messages, setMessages] = useState(conversation?.messages);
   const [isLoading, setLoading] = useState(false);
   const [isConnected, setConnected] = useState(false);
   const ref = useRef();
+
+  useEffect(() => setMessages(conversation?.messages), [conversation]);
 
   const sendMessage = text => {
     const data = JSON.stringify({ conversationId: id, message: { text } });
@@ -45,7 +48,7 @@ export default function MessagesSection({ conversation }) {
       </Row>
 
       <SockJsClient
-        url={BACKEND_URL + "/chat"}
+        url={BACKEND_URL + CHAT_PATH}
         topics={[TOPIC_PATH]}
         onMessage={handleReceivedMessage}
         ref={ref}

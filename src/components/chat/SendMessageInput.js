@@ -5,6 +5,7 @@ import { useInputHandling } from "../../hooks";
 export default function SendMessageInput({ sendMessage }) {
   const [inputs, handleInputChange, setInputs] = useInputHandling({ message: "" });
 
+  // TODO Handle error
   const submit = e => {
     e.preventDefault();
     const { message } = inputs;
