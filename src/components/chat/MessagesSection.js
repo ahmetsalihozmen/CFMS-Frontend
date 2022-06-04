@@ -1,31 +1,13 @@
-import React, { useEffect, useRef, useState } from "react";
+import React from "react";
 import { Col, Row } from "react-bootstrap";
-import { BACKEND_URL, CHAT_PATH, SEND_MESSAGE_PATH, TOPIC_PATH } from "../../utils/constants";
 import MessagesSectionHeader from "./MessagesSectionHeader";
 import MessagesSectionListItem from "./MessagesSectionListItem";
 import SendMessageInput from "./SendMessageInput";
-import SockJsClient from "react-stomp";
 
-export default function MessagesSection({ conversation }) {
-  if (!conversation) return <></>;
-  const { id } = conversation;
-  const [messages, setMessages] = useState(conversation?.messages);
-  const [isLoading, setLoading] = useState(false);
-  const [isConnected, setConnected] = useState(false);
-  const ref = useRef();
+export default function MessagesSection({ conversation, sendMessage }) {
+  const messages = conversation?.messages;
 
-  useEffect(() => setMessages(conversation?.messages), [conversation]);
-
-  const sendMessage = text => {
-    const data = JSON.stringify({ conversationId: id, message: { text } });
-    ref.current.sendMessage(SEND_MESSAGE_PATH, data);
-  };
-
-  const handleReceivedMessage = message => {
-    console.log("Received message:", message);
-    if (message.event === "NEW_MESSAGE" || message.event === "SENT_MESSAGE")
-      setMessages(messages => [...messages, message.payload]);
-  };
+  if (!messages || messages.length < 1) return <></>;
 
   return (
     <>
@@ -33,11 +15,9 @@ export default function MessagesSection({ conversation }) {
 
       <Row>
         <Col className="py-3 px-4">
-          {messages ? (
-            messages.map(message => <MessagesSectionListItem message={message} />)
-          ) : (
-            <h1>No messages...</h1>
-          )}
+          {messages.map(message => (
+            <MessagesSectionListItem message={message} />
+          ))}
         </Col>
       </Row>
 
@@ -46,22 +26,6 @@ export default function MessagesSection({ conversation }) {
           <SendMessageInput sendMessage={sendMessage} />
         </Col>
       </Row>
-
-      <SockJsClient
-        url={BACKEND_URL + CHAT_PATH}
-        topics={[TOPIC_PATH]}
-        onMessage={handleReceivedMessage}
-        ref={ref}
-        onConnect={() => {
-          console.log("Connected");
-          setConnected(true);
-        }}
-        onDisconnect={() => {
-          console.log("Disconnected");
-          setConnected(false);
-        }}
-        debug={false}
-      />
     </>
   );
 }

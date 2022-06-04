@@ -4,7 +4,13 @@ import { Col, Row } from "react-bootstrap";
 export default function MessagesSectionListItem({ message }) {
   const { id, text, sentByClient, sentDate, attachments } = message;
 
-  const dateString = new Date(sentDate).toLocaleString();
+  const dateString = new Date(sentDate).toLocaleTimeString([], {
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
   const hasAttachments = attachments && attachments.length > 0;
   const dateClassName = "text-muted font-italic" + (sentByClient ? "" : " text-end");
   const boxClassName = sentByClient ? "bg-gray me-auto" : "bg-primary ms-auto";
@@ -30,7 +36,7 @@ export default function MessagesSectionListItem({ message }) {
       <Row>
         <Col xs="auto" className={boxClassName} style={boxStyle}>
           <Row>
-            <Col className="px-3 py-2">
+            <Col className="px-3 py-1">
               <text>{text}</text>
             </Col>
           </Row>
@@ -48,7 +54,9 @@ export default function MessagesSectionListItem({ message }) {
 
       <Row>
         <Col>
-          <p className={dateClassName}>{dateString}</p>
+          <p className={dateClassName} style={{ fontSize: 14 }}>
+            {dateString}
+          </p>
         </Col>
       </Row>
     </>
