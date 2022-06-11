@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { Col, Row } from "react-bootstrap";
 import MessagesSectionHeader from "./MessagesSectionHeader";
 import MessagesSectionListItem from "./MessagesSectionListItem";
@@ -18,6 +18,7 @@ export default function MessagesSection({ conversation, sendMessage, endConversa
           {messages.map(message => (
             <MessagesSectionListItem message={message} />
           ))}
+          <AlwaysScrollToBottom />
         </Col>
       </Row>
 
@@ -29,3 +30,9 @@ export default function MessagesSection({ conversation, sendMessage, endConversa
     </>
   );
 }
+
+const AlwaysScrollToBottom = () => {
+  const elementRef = useRef();
+  useEffect(() => elementRef.current.scrollIntoView());
+  return <div ref={elementRef} />;
+};
