@@ -1,7 +1,9 @@
+import axios from "axios";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { Container, Nav, Navbar, NavDropdown } from "react-bootstrap";
 import { parseJwt } from "../utils";
+import { LOGOUT_URL } from "../utils/constants";
 
 export default function Navigation() {
   const [name, setName] = useState("");
@@ -13,7 +15,11 @@ export default function Navigation() {
     setName(user ? `${user.first_name} ${user.last_name}` : "Profile");
   }, []);
 
-  const logout = () => {
+  const logout = async () => {
+    const options = {
+      headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` },
+    };
+    await axios.get(LOGOUT_URL, options);
     localStorage.removeItem("access_token");
     router.push("/");
   };

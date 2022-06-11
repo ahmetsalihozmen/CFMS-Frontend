@@ -9,6 +9,7 @@ import { LOGIN_URL } from "../utils/constants";
 export default function Login() {
   const [inputs, handleInputChange] = useInputHandling();
   const [isLoading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(null);
   const router = useRouter();
 
   const handleSubmit = async event => {
@@ -17,12 +18,12 @@ export default function Login() {
     setLoading(true);
     try {
       const response = await axios.post(LOGIN_URL, inputs, { "Content-Type": "application/json" });
-      console.log(response);
+      if (!response?.data?.success) throw new Error(response.data?.message || "An error occurred!");
       const { jwt } = response?.data?.data;
       localStorage.setItem("access_token", jwt);
       router.push("/chat");
     } catch (error) {
-      console.log(error);
+      setErrorMessage(error.message || "An error occurred!");
     }
     setLoading(false);
   };
@@ -40,6 +41,7 @@ export default function Login() {
                 id="username"
                 placeholder="Username"
                 onChange={handleInputChange}
+                required
               />
             </Form.Group>
 
@@ -51,12 +53,15 @@ export default function Login() {
                 type="password"
                 placeholder="Password"
                 onChange={handleInputChange}
+                required
               />
             </Form.Group>
 
             <Button type="submit" color="primary" className="w-100 mt-3" disabled={isLoading}>
               {isLoading ? <Spinner animation="border" role="status" size="sm" /> : "Submit"}
             </Button>
+
+            {errorMessage && <p className="text-danger mt-3">{errorMessage}</p>}
           </Form>
         </Col>
       </Row>
