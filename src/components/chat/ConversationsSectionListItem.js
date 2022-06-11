@@ -7,7 +7,13 @@ import PlatformIcon from "./PlatformIcon";
 export default function ConversationsSectionListItem({ conversation, setSelectedConversation }) {
   console.log("ConversationsSectionListItem:", conversation);
   const { id, platform, clientName, lastMessageDate, lastMessagePreview } = conversation;
-  const dateString = new Date(lastMessageDate).toLocaleString();
+  const dateString = new Date(lastMessageDate).toLocaleTimeString([], {
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 
   const handleClick = async () => {
     const options = {
@@ -41,9 +47,7 @@ export default function ConversationsSectionListItem({ conversation, setSelected
 
             <Row>
               <Col>
-                <text className="text-muted">
-                  {lastMessagePreview || "Last message preview..."}
-                </text>
+                <text className="text-muted">{lastMessagePreview || ""}</text>
               </Col>
             </Row>
           </Col>

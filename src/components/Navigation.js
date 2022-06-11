@@ -29,13 +29,15 @@ export default function Navigation() {
       <Container fluid>
         <Navbar.Brand href="/">CFMS</Navbar.Brand>
         <Navbar.Toggle aria-controls="navbar-collapse" />
-        <Navbar.Collapse id="navbar-collapse">
-          <Nav className="ms-auto">
-            <NavDropdown title={name} id="profile-dropdown">
-              <NavDropdown.Item onClick={logout}>Logout</NavDropdown.Item>
-            </NavDropdown>
-          </Nav>
-        </Navbar.Collapse>
+        {router.pathname !== "/login" && (
+          <Navbar.Collapse id="navbar-collapse">
+            <Nav className="ms-auto">
+              <NavDropdown title={name} id="profile-dropdown">
+                <NavDropdown.Item onClick={logout}>Logout</NavDropdown.Item>
+              </NavDropdown>
+            </Nav>
+          </Navbar.Collapse>
+        )}
       </Container>
     </Navbar>
   );

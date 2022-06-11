@@ -74,14 +74,14 @@ export default function ChatPage() {
 
   const handleUpdate = message => {
     console.log("Received message:", message);
-    if (message.event === "SENT_MESSAGE" && message.conversationId === selectedConversation.id)
+    if (message.event === "SENT_MESSAGE" && message.conversationId === selectedConversation?.id)
       setSelectedConversation(prevState => ({
         ...prevState,
         messages: [...prevState.messages, message.payload],
       }));
     else if (
       message.event === "SENT_MESSAGES" &&
-      message.conversationId === selectedConversation.id
+      message.conversationId === selectedConversation?.id
     ) {
       const payload = message.payload;
       setSelectedConversation(prevState => ({
@@ -114,7 +114,7 @@ export default function ChatPage() {
           />
         </Col>
 
-        <Col xs={7} className="border">
+        <Col xs={7} >
           <MessagesSection conversation={selectedConversation} sendMessage={sendMessage} endConversation={endConversation} />
         </Col>
       </Row>

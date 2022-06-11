@@ -7,13 +7,13 @@ export default function ConversationsSection({ conversations, setSelectedConvers
   return (
     <div>
       <Row>
-        <Col>
+        <Col className="pb-2">
           <ConversationsSectionHeader />
         </Col>
       </Row>
 
       <Row>
-        <Col>
+        <Col style={{ height: "60vh", overflowY: "scroll" }}>
           <ListGroup>
             {conversations.map(conversation => (
               <ConversationsSectionListItem

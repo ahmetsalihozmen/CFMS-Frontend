@@ -6,7 +6,7 @@ export default function ConversationsSectionHeader() {
     <>
       <Row>
         <Col>
-          <h1>Conversations</h1>
+          <h3>Conversations</h3>
         </Col>
       </Row>
 

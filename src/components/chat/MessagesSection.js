@@ -14,7 +14,7 @@ export default function MessagesSection({ conversation, sendMessage, endConversa
       <MessagesSectionHeader conversation={conversation} endConversation={endConversation} />
 
       <Row>
-        <Col className="py-3 px-4">
+        <Col className="py-3 px-4" style={{ height: "60vh", overflowY: "scroll" }}>
           {messages.map(message => (
             <MessagesSectionListItem message={message} />
           ))}
