@@ -54,19 +54,21 @@ export default function ChatPage() {
 
   const handleUpdate = message => {
     console.log("Received message:", message);
-    if (message.event === "NEW_MESSAGE" || message.event === "SENT_MESSAGE")
+    if (message.event === "SENT_MESSAGE" && message.conversationId === selectedConversation.id) 
       setSelectedConversation(prevState => ({
         ...prevState,
         messages: [...prevState.messages, message.payload],
       }));
-    else if (message.event === "SENT_MESSAGES"){
+    else if (message.event === "SENT_MESSAGES" && message.conversationId === selectedConversation.id){
       const payload = message.payload;
       setSelectedConversation(prevState => ({
         ...prevState,
         messages: [...prevState.messages, ...payload],
       }));}
-    else if (message.event === "NEW_CONVERSATION")
+    else if (message.event === "NEW_CONVERSATION"){
+      console.log("New conversation:", message.payload) 
       setConversations(conversations => [...conversations, message.payload]);
+    }
   };
 
   const handleSocketConnect = () => {
