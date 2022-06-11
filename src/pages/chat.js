@@ -74,25 +74,40 @@ export default function ChatPage() {
 
   const handleUpdate = message => {
     console.log("Received message:", message);
-    if (message.event === "SENT_MESSAGE" && message.conversationId === selectedConversation?.id)
-      setSelectedConversation(prevState => ({
-        ...prevState,
-        messages: [...prevState.messages, message.payload],
-      }));
-    else if (
-      message.event === "SENT_MESSAGES" &&
-      message.conversationId === selectedConversation?.id
-    ) {
+    if (message.event === "SENT_MESSAGE"){
+      if (message.conversationId === selectedConversation?.id)
+        setSelectedConversation(prevState => ({
+          ...prevState,
+          messages: [...prevState.messages, message.payload],
+        }));
+      conversationUpdate(message.payload, message.conversationId);
+    }
+
+    else if (message.event === "SENT_MESSAGES") {
       const payload = message.payload;
-      setSelectedConversation(prevState => ({
-        ...prevState,
-        messages: [...prevState.messages, ...payload],
-      }));
-    } else if (message.event === "NEW_CONVERSATION") {
+      if (message.conversationId === selectedConversation?.id){
+        setSelectedConversation(prevState => ({
+          ...prevState,
+          messages: [...prevState.messages, ...payload],
+        }));
+      }
+      conversationUpdate(payload.at(-1), message.conversationId)
+    } 
+    
+    else if (message.event === "NEW_CONVERSATION") {
       console.log("New conversation:", message.payload);
       setConversations(conversations => [...conversations, message.payload]);
     }
   };
+
+  const conversationUpdate = (message, conversationId) => {
+    const index = conversations.findIndex(conversation => conversation.id === conversationId);
+    let newConversations = [...conversations];
+    newConversations[index].lastMessageDate = message.sentDate;
+    newConversations[index].lastMessagePreview = message.text;
+    setConversations(newConversations);
+
+  }
 
   const handleSocketConnect = () => {
     console.log("Connected");
