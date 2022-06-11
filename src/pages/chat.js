@@ -59,6 +59,12 @@ export default function ChatPage() {
         ...prevState,
         messages: [...prevState.messages, message.payload],
       }));
+    else if (message.event === "SENT_MESSAGES"){
+      const payload = message.payload;
+      setSelectedConversation(prevState => ({
+        ...prevState,
+        messages: [...prevState.messages, ...payload],
+      }));}
     else if (message.event === "NEW_CONVERSATION")
       setConversations(conversations => [...conversations, message.payload]);
   };
