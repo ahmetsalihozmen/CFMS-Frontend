@@ -9,6 +9,7 @@ import {
   CHAT_PATH,
   SEND_MESSAGE_PATH,
   TOPIC_PATH,
+  END_CONVERSATION_PATH
 } from "../utils/constants";
 import ConversationsSection from "../components/chat/ConversationsSection";
 import MessagesSection from "../components/chat/MessagesSection";
@@ -59,6 +60,18 @@ export default function ChatPage() {
     sockJsRef.current.sendMessage(SEND_MESSAGE_PATH, data);
   };
 
+  const endConversation = () => {
+    const { id } = selectedConversation;
+    if (!id) return;
+    console.log("end conversation" + id);
+    const data = JSON.stringify({ conversationId: id });
+    sockJsRef.current.sendMessage(END_CONVERSATION_PATH, data);
+    setConversations(conversations.filter(
+      conversation => conversation.id !== id
+    ));
+    setSelectedConversation(null);
+  }
+
   const handleUpdate = message => {
     console.log("Received message:", message);
     if (message.event === "SENT_MESSAGE" && message.conversationId === selectedConversation.id)
@@ -102,7 +115,7 @@ export default function ChatPage() {
         </Col>
 
         <Col xs={7} className="border">
-          <MessagesSection conversation={selectedConversation} sendMessage={sendMessage} />
+          <MessagesSection conversation={selectedConversation} sendMessage={sendMessage} endConversation={endConversation} />
         </Col>
       </Row>
 
