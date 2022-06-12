@@ -9,12 +9,6 @@ export default function ConversationsSectionHeader() {
           <h3>Conversations</h3>
         </Col>
       </Row>
-
-      <Row>
-        <Col>
-          <Form.Control type="text" placeholder="Search" />
-        </Col>
-      </Row>
     </>
   );
 }

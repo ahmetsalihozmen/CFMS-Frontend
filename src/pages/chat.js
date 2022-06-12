@@ -9,47 +9,56 @@ import {
   CHAT_PATH,
   SEND_MESSAGE_PATH,
   TOPIC_PATH,
-  END_CONVERSATION_PATH
+  END_CONVERSATION_PATH,
 } from "../utils/constants";
 import ConversationsSection from "../components/chat/ConversationsSection";
 import MessagesSection from "../components/chat/MessagesSection";
 import MainLayout from "../components/layouts/MainLayout";
+import { parseJwt } from "../utils";
 
 export default function ChatPage() {
   const [conversations, setConversations] = useState([]);
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [isLoading, setLoading] = useState(false);
   const [isConnected, setConnected] = useState(false);
+  const [username, setUsername] = useState(null);
   const sockJsRef = useRef();
   const router = useRouter();
 
+  const fetchConversations = async () => {
+    setLoading(true);
+    try {
+      const options = {
+        headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` },
+      };
+
+      const conversationsResponse = await axios.get(CONVERSATIONS_URL, options);
+      const conversations = conversationsResponse?.data?.data;
+      setConversations(conversations.map(c => ({ ...c, isSeen: true })));
+
+      const conversationId = conversations[0]?.id;
+      if (!conversationId) return;
+      const url = `${CONVERSATIONS_URL}/${conversationId}`;
+      const conversationResponse = await axios.get(url, options);
+      return conversationResponse?.data?.data;
+    } catch (error) {
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        localStorage.removeItem("access_token");
+        router.push("/");
+      } else router.push("/500");
+
+      console.log(error);
+    }
+    setLoading(false);
+  };
+
   useEffect(() => {
     (async () => {
-      setLoading(true);
-      try {
-        const options = {
-          headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` },
-        };
-
-        const conversationsResponse = await axios.get(CONVERSATIONS_URL, options);
-        const conversations = conversationsResponse?.data?.data;
-        setConversations(conversations);
-
-        const conversationId = conversations[0]?.id;
-        if (!conversationId) return;
-        const url = `${CONVERSATIONS_URL}/${conversationId}`;
-        const conversationResponse = await axios.get(url, options);
-        const conversation = conversationResponse?.data?.data;
-        setSelectedConversation(conversation);
-      } catch (error) {
-        if (error.response?.status === 401 || error.response?.status === 403) {
-          localStorage.removeItem("access_token");
-          router.push("/");
-        } else router.push("/500");
-
-        console.log(error);
-      }
-      setLoading(false);
+      const conversation = await fetchConversations();
+      setSelectedConversation(conversation);
+      const token = localStorage.getItem("access_token");
+      const user = parseJwt(token);
+      setUsername(user.sub);
     })();
   }, []);
 
@@ -66,48 +75,66 @@ export default function ChatPage() {
     console.log("end conversation" + id);
     const data = JSON.stringify({ conversationId: id });
     sockJsRef.current.sendMessage(END_CONVERSATION_PATH, data);
-    setConversations(conversations.filter(
-      conversation => conversation.id !== id
-    ));
+    setConversations(conversations.filter(conversation => conversation.id !== id));
     setSelectedConversation(null);
-  }
+  };
 
-  const handleUpdate = message => {
+  const handleUpdate = async message => {
     console.log("Received message:", message);
-    if (message.event === "SENT_MESSAGE"){
+    console.log("Username:", username);
+    if (message.event === "SENT_MESSAGE") {
       if (message.conversationId === selectedConversation?.id)
         setSelectedConversation(prevState => ({
           ...prevState,
           messages: [...prevState.messages, message.payload],
         }));
-      conversationUpdate(message.payload, message.conversationId);
-    }
-
-    else if (message.event === "SENT_MESSAGES") {
+      await conversationUpdate(message.payload, message.conversationId);
+    } else if (message.event === "SENT_MESSAGES") {
       const payload = message.payload;
-      if (message.conversationId === selectedConversation?.id){
+      await conversationUpdate(payload.at(-1), message.conversationId);
+      if (message.conversationId === selectedConversation?.id) {
         setSelectedConversation(prevState => ({
           ...prevState,
           messages: [...prevState.messages, ...payload],
         }));
       }
-      conversationUpdate(payload.at(-1), message.conversationId)
-    } 
-    
-    else if (message.event === "NEW_CONVERSATION") {
+    } else if (message.event === "NEW_CONVERSATION" && message.payload.assignedTo === username) {
       console.log("New conversation:", message.payload);
-      setConversations(conversations => [...conversations, message.payload]);
+      setConversations(conversations => [...conversations, { ...message.payload, isSeen: false }]);
+      if (!selectedConversation) {
+        const options = {
+          headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` },
+        };
+        try {
+          const url = `${CONVERSATIONS_URL}/${message?.payload?.id}`;
+          const conversationResponse = await axios.get(url, options);
+          const conversation = conversationResponse?.data?.data;
+          setSelectedConversation(conversation);
+        } catch (error) {
+          console.log(error);
+        }
+      }
     }
   };
 
-  const conversationUpdate = (message, conversationId) => {
-    const index = conversations.findIndex(conversation => conversation.id === conversationId);
-    let newConversations = [...conversations];
-    newConversations[index].lastMessageDate = message.sentDate;
-    newConversations[index].lastMessagePreview = message.text;
-    setConversations(newConversations);
+  const conversationUpdate = async (message, conversationId) => {
+    const index = conversations?.findIndex(conversation => conversation?.id === conversationId);
 
-  }
+    if (index === -1) await fetchConversations();
+
+    let newConversations = [...conversations];
+    if (
+      index === -1 ||
+      !newConversations ||
+      !newConversations[index] ||
+      !newConversations[index].lastMessageDate
+    )
+      return;
+    newConversations[index].lastMessageDate = message?.sentDate;
+    newConversations[index].lastMessagePreview = message?.text;
+    newConversations[index].isSeen = selectedConversation.id === conversationId ? true : false;
+    setConversations(newConversations);
+  };
 
   const handleSocketConnect = () => {
     console.log("Connected");
@@ -126,11 +153,16 @@ export default function ChatPage() {
           <ConversationsSection
             conversations={conversations}
             setSelectedConversation={setSelectedConversation}
+            setConversations={setConversations}
           />
         </Col>
 
-        <Col xs={7} >
-          <MessagesSection conversation={selectedConversation} sendMessage={sendMessage} endConversation={endConversation} />
+        <Col xs={7}>
+          <MessagesSection
+            conversation={selectedConversation}
+            sendMessage={sendMessage}
+            endConversation={endConversation}
+          />
         </Col>
       </Row>
 

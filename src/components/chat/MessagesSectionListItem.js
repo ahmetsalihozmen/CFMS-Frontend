@@ -13,7 +13,7 @@ export default function MessagesSectionListItem({ message }) {
   });
   const hasAttachments = attachments && attachments.length > 0;
   const dateClassName = "text-muted font-italic" + (sentByClient ? "" : " text-end");
-  const boxClassName = sentByClient ? "bg-gray me-auto" : "bg-primary ms-auto";
+  const boxClassName = sentByClient ? "bg-gray me-auto" : "bg-primary ms-auto text-white";
   const boxStyle = {
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
