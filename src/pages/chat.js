@@ -58,7 +58,7 @@ export default function ChatPage() {
       setSelectedConversation(conversation);
       const token = localStorage.getItem("access_token");
       const user = parseJwt(token);
-      setUsername(user.sub);
+      setUsername(user?.sub || null);
     })();
   }, []);
 
